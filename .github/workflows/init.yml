@@ -21,7 +21,10 @@ jobs:
 
       - name: Initialize Astro project
         run: |
-          npm init astro@latest . -- --template minimal --yes
+          npm init astro@latest astro-temp -- --template minimal --yes --no-git
+          cp -r astro-temp/* .
+          cp -r astro-temp/.* . 2>/dev/null || true
+          rm -rf astro-temp
           npm install
 
       - name: Create project structure
