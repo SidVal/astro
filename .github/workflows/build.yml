@@ -1,10 +1,14 @@
 name: Build and Deploy Astro
 
 on:
-  push:
-    branches:
-      - main
+ # push:
+ #   branches:
+ #     - main
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Reiniciar Sandbox"]
+    types:
+      - completed
 
 permissions:
   contents: read
