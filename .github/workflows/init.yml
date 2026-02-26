@@ -18,14 +18,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
       - name: Initialize Astro project
         run: |
-          npm create astro@latest . \
-            -- --template minimal \
-            --install \
-            --no-git
+          npm init astro@latest . -- --template minimal --yes
+          npm install
 
       - name: Create project structure
         run: |
