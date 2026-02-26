@@ -1,0 +1,87 @@
+name: Initialize Astro Project
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Initialize Astro project
+        run: |
+          npm create astro@latest . \
+            -- --template minimal \
+            --install \
+            --no-git
+
+      - name: Create project structure
+        run: |
+          mkdir -p src/layouts
+          mkdir -p src/components
+          mkdir -p src/content/blog
+          mkdir -p public/css
+          mkdir -p public/images
+
+      - name: Create base layout
+        run: |
+          cat <<EOF > src/layouts/Base.astro
+          ---
+          const { title = "Sitio Institucional" } = Astro.props;
+          ---
+          <!DOCTYPE html>
+          <html lang="es">
+            <head>
+              <meta charset="UTF-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+              <title>{title}</title>
+              <meta name="robots" content="noindex,nofollow" />
+              <link rel="stylesheet" href="/css/base.css" />
+            </head>
+            <body>
+              <slot />
+            </body>
+          </html>
+          EOF
+
+      - name: Create base CSS
+        run: |
+          cat <<EOF > public/css/base.css
+          /* Base CSS - Temporary */
+          body {
+            font-family: system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+          }
+          EOF
+
+      - name: Update package.json scripts
+        run: |
+          node -e "
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json'));
+          pkg.scripts.build = 'astro build';
+          pkg.scripts.dev = 'astro dev';
+          pkg.scripts.preview = 'astro preview';
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+          "
+
+      - name: Commit generated project
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "Initialize Astro project structure"
+          git push
