@@ -1,0 +1,53 @@
+name: Reiniciar Sandbox
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Clean project content but keep base
+        run: |
+          rm -rf src/content
+          rm -rf src/components
+          rm -rf src/pages/*
+          rm -rf dist
+
+      - name: Recreate base index page
+        run: |
+          mkdir -p src/pages
+          cat <<EOF > src/pages/index.astro
+          ---
+          import Base from "../layouts/Base.astro";
+          ---
+          <Base title="Sandbox Astro">
+            <main>
+              <h1>Sandbox listo</h1>
+              <p>Proyecto reiniciado correctamente.</p>
+            </main>
+          </Base>
+          EOF
+
+      - name: Ensure robots.txt exists
+        run: |
+          mkdir -p public
+          cat <<EOF > public/robots.txt
+          User-agent: *
+          Disallow: /
+          EOF
+
+      - name: Commit reset state
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "Reset sandbox to base functional state"
+          git push
